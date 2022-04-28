@@ -33,3 +33,22 @@ resource "aws_iam_role" "backend_task_role" {
     create_before_destroy = true
   }
 }
+
+resource "aws_iam_role" "frontend_autoscaling_role" {
+  name               = "${var.prefix}-frontend-autoscaling-role"
+  assume_role_policy = data.aws_iam_policy_document.ecs_autoscaling_role.json
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_frontend_autoscaling_role_policy" {
+  role       = aws_iam_role.frontend_autoscaling_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceAutoscaleRole"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
