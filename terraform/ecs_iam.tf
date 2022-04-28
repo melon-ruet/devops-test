@@ -33,13 +33,3 @@ resource "aws_iam_role" "backend_task_role" {
     create_before_destroy = true
   }
 }
-
-resource "aws_iam_role_policy" "backend_rds_role_policy" {
-  name   = "${var.prefix}-backend-rds-role-policy"
-  role   = aws_iam_role.backend_task_role.id
-  policy = data.aws_iam_policy_document.rds_permission.json
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
