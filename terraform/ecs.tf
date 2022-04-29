@@ -33,6 +33,14 @@ resource "aws_ecs_task_definition" "ecs_frontend_task" {
           hostPort      = 80
         }
       ]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-region        = data.aws_region.current.name
+          awslogs-group         = aws_cloudwatch_log_group.frontend_cw.name
+          awslogs-stream-prefix = "frontend-ecs"
+        }
+      }
     }
   ])
 
@@ -49,17 +57,14 @@ resource "aws_ecs_service" "frontend_service" {
   desired_count   = 1
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.lb_target_group.arn
+    target_group_arn = aws_lb_target_group.frontend_target_group.arn
     container_name   = "${var.prefix}-frontend-container"
     container_port   = 80
   }
 
   network_configuration {
     subnets          = data.aws_subnets.default.ids
-    assign_public_ip = true
   }
-
-  depends_on = [aws_alb_listener.app_http]
 
   lifecycle {
     create_before_destroy = true
@@ -85,7 +90,7 @@ resource "aws_ecs_task_definition" "ecs_backend_task" {
       portMappings = [
         {
           containerPort = 5000
-          hostPort      = 80
+          hostPort      = 5000
         }
       ]
       environment = [
@@ -94,7 +99,7 @@ resource "aws_ecs_task_definition" "ecs_backend_task" {
           value = aws_db_instance.default.endpoint
         },
         {
-          name = "DB_NAME"
+          name  = "DB_NAME"
           value = aws_db_instance.default.db_name
         },
         {
@@ -106,6 +111,14 @@ resource "aws_ecs_task_definition" "ecs_backend_task" {
           value = var.db_password
         }
       ]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-region        = data.aws_region.current.name
+          awslogs-group         = aws_cloudwatch_log_group.backend_cw.name
+          awslogs-stream-prefix = "backend-ecs"
+        }
+      }
     }
   ])
 
@@ -122,17 +135,15 @@ resource "aws_ecs_service" "backend_service" {
   desired_count   = 1
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.lb_target_group.arn
+    target_group_arn = aws_lb_target_group.backend_target_group.arn
     container_name   = "${var.prefix}-backend-container"
-    container_port   = 80
+    container_port   = 5000
   }
 
   network_configuration {
     subnets          = data.aws_subnets.default.ids
-    assign_public_ip = true
+    security_groups = [aws_security_group.allow_mysql_ecs.id]
   }
-
-  depends_on = [aws_alb_listener.app_http]
 
   lifecycle {
     create_before_destroy = true
