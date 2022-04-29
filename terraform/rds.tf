@@ -1,12 +1,3 @@
-resource "aws_db_subnet_group" "rds_subnet_group" {
-  name       = "${var.prefix}-db-subnet-group"
-  subnet_ids = data.aws_subnets.default.ids
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
 resource "aws_db_instance" "default" {
   identifier = "${var.prefix}-db"
 
@@ -21,8 +12,7 @@ resource "aws_db_instance" "default" {
   password             = var.db_password
   parameter_group_name = "default.mysql5.7"
   skip_final_snapshot  = true
-
-  db_subnet_group_name = aws_db_subnet_group.rds_subnet_group.name
+  vpc_security_group_ids = [aws_security_group.allow_mysql_rds.id]
 
   lifecycle {
     create_before_destroy = true
