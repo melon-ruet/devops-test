@@ -84,13 +84,13 @@ resource "aws_ecs_task_definition" "ecs_backend_task" {
       essential    = true
       portMappings = [
         {
-          containerPort = 80
+          containerPort = 5000
           hostPort      = 80
         }
       ]
       environment = [
         {
-          name  = "DB_CONNECTION"
+          name  = "DB_ENDPOINT"
           value = aws_db_instance.default.endpoint
         },
         {
