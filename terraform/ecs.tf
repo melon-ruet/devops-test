@@ -22,11 +22,11 @@ resource "aws_ecs_task_definition" "ecs_frontend_task" {
 
   container_definitions = jsonencode([
     {
-      name      = "${var.prefix}-frontend-container"
-      image     = "${aws_ecr_repository.frontend.repository_url}:${local.frontend_dockerfile_dir_hash}"
-      cpu       = var.container_cpu
-      memory    = var.container_memory
-      essential = true
+      name         = "${var.prefix}-frontend-container"
+      image        = "${aws_ecr_repository.frontend.repository_url}:${local.frontend_dockerfile_dir_hash}"
+      cpu          = var.container_cpu
+      memory       = var.container_memory
+      essential    = true
       portMappings = [
         {
           containerPort = 80
@@ -45,7 +45,7 @@ resource "aws_ecs_service" "frontend_service" {
   name            = "${var.prefix}-frontend-service"
   cluster         = aws_ecs_cluster.cluster.id
   task_definition = aws_ecs_task_definition.ecs_frontend_task.arn
-  launch_type = "FARGATE"
+  launch_type     = "FARGATE"
   desired_count   = 1
 
   load_balancer {
@@ -55,7 +55,7 @@ resource "aws_ecs_service" "frontend_service" {
   }
 
   network_configuration {
-    subnets = data.aws_subnets.default.ids
+    subnets          = data.aws_subnets.default.ids
     assign_public_ip = true
   }
 
@@ -77,15 +77,33 @@ resource "aws_ecs_task_definition" "ecs_backend_task" {
 
   container_definitions = jsonencode([
     {
-      name      = "${var.prefix}-backend-container"
-      image     = "${aws_ecr_repository.backend.repository_url}:${local.backend_dockerfile_dir_hash}"
-      cpu       = var.container_cpu
-      memory    = var.container_memory
-      essential = true
+      name         = "${var.prefix}-backend-container"
+      image        = "${aws_ecr_repository.backend.repository_url}:${local.backend_dockerfile_dir_hash}"
+      cpu          = var.container_cpu
+      memory       = var.container_memory
+      essential    = true
       portMappings = [
         {
           containerPort = 80
           hostPort      = 80
+        }
+      ]
+      environment = [
+        {
+          name  = "DB_CONNECTION"
+          value = aws_db_instance.default.endpoint
+        },
+        {
+          name = "DB_NAME"
+          value = aws_db_instance.default.db_name
+        },
+        {
+          name  = "DB_USER"
+          value = var.db_user
+        },
+        {
+          name  = "DB_PASSWORD"
+          value = var.db_password
         }
       ]
     }
@@ -100,7 +118,7 @@ resource "aws_ecs_service" "backend_service" {
   name            = "${var.prefix}-backend-service"
   cluster         = aws_ecs_cluster.cluster.id
   task_definition = aws_ecs_task_definition.ecs_backend_task.arn
-  launch_type = "FARGATE"
+  launch_type     = "FARGATE"
   desired_count   = 1
 
   load_balancer {
@@ -110,7 +128,7 @@ resource "aws_ecs_service" "backend_service" {
   }
 
   network_configuration {
-    subnets = data.aws_subnets.default.ids
+    subnets          = data.aws_subnets.default.ids
     assign_public_ip = true
   }
 
