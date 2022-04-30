@@ -21,11 +21,6 @@ def check_db_connection():
 
 
 @app.route("/")
-def health():
-    return "healthy"
-
-
-@app.route("/db")
 def test_db_connection():
     return check_db_connection()
 
