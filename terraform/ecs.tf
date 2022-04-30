@@ -64,6 +64,7 @@ resource "aws_ecs_service" "frontend_service" {
 
   network_configuration {
     subnets          = data.aws_subnets.default.ids
+    assign_public_ip = true
   }
 
   lifecycle {
@@ -96,7 +97,7 @@ resource "aws_ecs_task_definition" "ecs_backend_task" {
       environment = [
         {
           name  = "DB_ENDPOINT"
-          value = aws_db_instance.default.endpoint
+          value = aws_db_instance.default.address
         },
         {
           name  = "DB_NAME"
@@ -142,7 +143,8 @@ resource "aws_ecs_service" "backend_service" {
 
   network_configuration {
     subnets          = data.aws_subnets.default.ids
-    security_groups = [aws_security_group.allow_mysql_ecs.id]
+    security_groups = [aws_security_group.backend_sg.id]
+    assign_public_ip = true
   }
 
   lifecycle {
