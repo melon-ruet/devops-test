@@ -7,8 +7,8 @@ resource "aws_lb" "frontend_lb" {
 }
 
 resource "aws_lb_target_group" "frontend_target_group" {
-  name        = "${var.prefix}-lb-frontend-group"
-  port        = 8080
+  name        = "${var.prefix}-lb-frontend-target-group"
+  port        = 80
   protocol    = "HTTP"
   vpc_id      = data.aws_vpc.default.id
   target_type = "ip"
@@ -35,8 +35,8 @@ resource "aws_lb" "backend_lb" {
 }
 
 resource "aws_lb_target_group" "backend_target_group" {
-  name        = "${var.prefix}-lb-backend-group"
-  port        = 5000
+  name        = "${var.prefix}-lb-backend-target-group"
+  port        = 80
   protocol    = "HTTP"
   vpc_id      = data.aws_vpc.default.id
   target_type = "ip"
